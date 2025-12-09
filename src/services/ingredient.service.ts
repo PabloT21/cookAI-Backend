@@ -1,68 +1,50 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Ingredient } from '../entities/ingredient.entity';
 import { CreateIngredientDto } from '../dto/create-ingredient.dto';
 import { UpdateIngredientDto } from '../dto/update-ingredient.dto';
 
 @Injectable()
 export class IngredientService {
-  private ingredients: Ingredient[] = [];
-  private idCounter = 1;
+  constructor(
+    @InjectRepository(Ingredient)
+    private ingredientRepository: Repository<Ingredient>,
+  ) {}
 
-  findAll(): Ingredient[] {
-    return this.ingredients;
+  findAll(): Promise<Ingredient[]> {
+    return this.ingredientRepository.find();
   }
 
-  findOne(id: string): Ingredient | undefined {
-    return this.ingredients.find(ingredient => ingredient.id === id);
+  findOne(id: string): Promise<Ingredient | null> {
+    return this.ingredientRepository.findOne({ where: { id } });
   }
 
-  create(createIngredientDto: CreateIngredientDto): Ingredient {
-    const ingredient: Ingredient = {
-      id: this.idCounter.toString(),
+  create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {
+    const ingredient = this.ingredientRepository.create({
       name: createIngredientDto.name,
-      available: createIngredientDto.available,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.idCounter++;
-    this.ingredients.push(ingredient);
-    return ingredient;
+      available: createIngredientDto.available ?? false,
+    });
+    return this.ingredientRepository.save(ingredient);
   }
 
-  update(id: string, updateIngredientDto: UpdateIngredientDto): Ingredient | null {
-    const ingredient = this.findOne(id);
-    if (!ingredient) {
-      return null;
-    }
-
-    if (updateIngredientDto.name !== undefined) {
-      ingredient.name = updateIngredientDto.name;
-    }
-    if (updateIngredientDto.available !== undefined) {
-      ingredient.available = updateIngredientDto.available;
-    }
-    ingredient.updatedAt = new Date();
-
-    return ingredient;
+  async update(id: string, updateIngredientDto: UpdateIngredientDto): Promise<Ingredient | null> {
+    await this.ingredientRepository.update(id, updateIngredientDto);
+    return this.findOne(id);
   }
 
-  remove(id: string): boolean {
-    const index = this.ingredients.findIndex(ingredient => ingredient.id === id);
-    if (index === -1) {
-      return false;
-    }
-    this.ingredients.splice(index, 1);
-    return true;
+  async remove(id: string): Promise<boolean> {
+    const result = await this.ingredientRepository.delete(id);
+    return (result.affected ?? 0) > 0;
   }
 
-  toggleAvailability(id: string): Ingredient | null {
-    const ingredient = this.findOne(id);
+  async toggleAvailability(id: string): Promise<Ingredient | null> {
+    const ingredient = await this.findOne(id);
     if (!ingredient) {
       return null;
     }
     ingredient.available = !ingredient.available;
-    ingredient.updatedAt = new Date();
-    return ingredient;
+    return this.ingredientRepository.save(ingredient);
   }
 }
 

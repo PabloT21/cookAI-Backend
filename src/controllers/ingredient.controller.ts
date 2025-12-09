@@ -46,8 +46,8 @@ export class IngredientController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    const deleted = this.ingredientService.remove(id);
+  async remove(@Param('id') id: string) {
+    const deleted = await this.ingredientService.remove(id);
     if (!deleted) {
       return { message: 'Ingrediente no encontrado' };
     }

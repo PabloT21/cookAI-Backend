@@ -1,5 +1,5 @@
 export class CreateIngredientDto {
   name: string;
-  available: boolean;
+  available?: boolean;
 }
 
