@@ -43,7 +43,7 @@ export class Recipe {
     user: User;
   
   @OneToMany(() => RecipeIngredient, (RI) => RI.recipe)
-    ingredients: Ingredient[];
+    ingredients: RecipeIngredient[];
 
   @ManyToMany(() => RecipeTag, (tag) => tag.recipes)
     tags: RecipeTag[];
