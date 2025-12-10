@@ -13,11 +13,16 @@ export class IngredientService {
   ) {}
 
   findAll(): Promise<Ingredient[]> {
-    return this.ingredientRepository.find();
+    return this.ingredientRepository.find({
+      relations: ['categories'],
+    });
   }
 
   findOne(id: string): Promise<Ingredient | null> {
-    return this.ingredientRepository.findOne({ where: { id } });
+    return this.ingredientRepository.findOne({
+      where: { id },
+      relations: ['categories'],
+    });
   }
 
   create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {

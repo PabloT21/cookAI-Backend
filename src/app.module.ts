@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { IngredientModule } from './modules/ingredient.module';
+import { IngredientCategoryModule } from './modules/ingredient-category.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { IngredientModule } from './modules/ingredient.module';
       synchronize: true, // Solo para desarrollo, en producción usar migraciones
     }),
     IngredientModule,
+    IngredientCategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
