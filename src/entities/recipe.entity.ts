@@ -6,9 +6,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
+  ManyToOne,
 } from 'typeorm';
 
 import { Ingredient } from './ingredient.entity';
+import { RecipeTag } from './recipeTag.entity';
+import {User} from "./user.entity";
 
 @Entity('recipes')
 export class Recipe {
@@ -18,6 +21,12 @@ export class Recipe {
 
   @Column()
   name: string;
+
+  @Column()
+  description: string;
+
+  @Column()
+  instructions: string;
   
   @Column('json')
   keys: string[];
@@ -28,8 +37,14 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @ManyToOne(() => User)
+    user: User;
+  
   @ManyToMany(() => Ingredient, (ingredient) => ingredient.recipes)
     ingredients: Ingredient[];
-  
+
+  @ManyToMany(() => RecipeTag, (tag) => tag.recipes)
+    tags: RecipeTag[];
+
 }
 
