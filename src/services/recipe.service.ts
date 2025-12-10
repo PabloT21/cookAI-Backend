@@ -21,14 +21,14 @@ export class RecipeService {
 
   findAll(): Promise<Recipe[]> {
     return this.recipeRepository.find({
-      relations: ['ingredients', 'tags'],
+      relations: ['ingredients', 'ingredients.ingredient', 'tags'],
     });
   }
 
   findOne(id: string): Promise<Recipe | null> {
     return this.recipeRepository.findOne({
       where: { id },
-      relations: ['ingredients', 'tags'],
+      relations: ['ingredients', 'ingredients.ingredient', 'tags'],
     });
   }
 
@@ -37,7 +37,6 @@ export class RecipeService {
       name: createRecipeDto.name,
       description: createRecipeDto.description,
       instructions: createRecipeDto.instructions,
-      
     });
     return this.recipeRepository.save(ingredient);
   }
