@@ -14,14 +14,14 @@ export class IngredientService {
 
   findAll(): Promise<Ingredient[]> {
     return this.ingredientRepository.find({
-      relations: ['categories'],
+      relations: ['categories', 'recipes'],
     });
   }
 
   findOne(id: string): Promise<Ingredient | null> {
     return this.ingredientRepository.findOne({
       where: { id },
-      relations: ['categories'],
+      relations: ['categories', 'recipes'],
     });
   }
 
