@@ -10,6 +10,7 @@ export class IngredientCategoryService {
   constructor(
     @InjectRepository(IngredientCategory)
     private categoryRepository: Repository<IngredientCategory>,
+    
   ) {}
 
   findAll(): Promise<IngredientCategory[]> {

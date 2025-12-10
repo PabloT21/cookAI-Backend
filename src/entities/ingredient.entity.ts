@@ -9,7 +9,7 @@ import {
   OneToMany
 } from 'typeorm';
 import { IngredientCategory } from './ingredientCategory.entity';
-import { RecipeIngredient } from './recipe-ingridient.entity';
+import { RecipeIngredient } from './recipe-ingredient.entity';
 import { Recipe } from './recipe.entity';
 
 @Entity('ingredients')

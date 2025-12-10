@@ -12,7 +12,7 @@ import {
 
 import { Ingredient } from './ingredient.entity';
 import { RecipeTag } from './recipeTag.entity';
-import {RecipeIngredient} from "./recipe-ingridient.entity";
+import {RecipeIngredient} from "./recipe-ingredient.entity";
 import {User} from "./user.entity";
 
 @Entity('recipes')
