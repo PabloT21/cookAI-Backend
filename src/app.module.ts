@@ -4,16 +4,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { IngredientModule } from './modules/ingredient.module';
 import { IngredientCategoryModule } from './modules/ingredient-category.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [
+  imports: [ ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
       port: 3306,
       username: 'root',
-      password: '123',
-      database: 'cookai',
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Solo para desarrollo, en producción usar migraciones
     }),
