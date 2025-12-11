@@ -32,14 +32,40 @@ export class RecipeService {
     });
   }
 
-  create(createRecipeDto: CreateRecipeDto): Promise<Recipe> {
-    const ingredient = this.recipeRepository.create({
+  async create(createRecipeDto: CreateRecipeDto): Promise<Recipe | null> {
+     const recipe = this.recipeRepository.create({
       name: createRecipeDto.name,
-      description: createRecipeDto.description,
-      instructions: createRecipeDto.instructions,
     });
-    return this.recipeRepository.save(ingredient);
-  }
+    await this.recipeRepository.save(recipe);
+    const relations: RecipeIngredient[] = []
+
+      for (const item of createRecipeDto.ingredients) {
+      const ingredient = await this.ingredientRepo.findOne({
+        where: { id: item.id },
+      });
+
+      if (!ingredient)
+        throw new NotFoundException(`El ingrediente no es valido`);
+
+      const ri = this.recipeIngredientRepository.create({ 
+        recipe,
+        ingredient,
+        quantity: item.quantity,
+      });
+
+      
+    await this.recipeIngredientRepository.save(relations);
+
+      relations.push(ri);
+    }
+
+    
+    
+  return this.recipeRepository.findOne({
+      where: { id: recipe.id },
+      relations: ['ingredients', 'ingredients.ingredient'],
+    });
+}
 
   async update(id: string, updateRecipeDto: UpdateRecipeDto): Promise<Recipe | null> {
     await this.recipeRepository.update(id, updateRecipeDto);

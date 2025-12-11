@@ -39,10 +39,6 @@ export class IngredientController {
     return this.ingredientService.update(id, updateIngredientDto);
   }
 
-  @Patch(':id/toggle-availability')
-  toggleAvailability(@Param('id') id: string) {
-    return this.ingredientService.toggleAvailability(id);
-  }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

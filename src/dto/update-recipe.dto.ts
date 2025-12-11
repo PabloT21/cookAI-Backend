@@ -1,7 +1,22 @@
+import { ArrayMinSize, Min, MinLength, ValidateNested } from 'class-validator';
+export class IngredientInputDto {
+  id: string;
+  name: string;
+  @Min(1)
+  quantity: number;
+  unit: string;
+}
+
+
+
 export class UpdateRecipeDto {
-  name?: string;
-  instructions?: string;
-  description?: string;
+  @MinLength(1)
+  name: string;
+  instructions: string;
+  description: string;
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1) 
+  ingredients: IngredientInputDto[];
   
   //dejo las keys para mas adelante
   //keys: string[];}

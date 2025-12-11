@@ -24,11 +24,6 @@ export class Ingredient {
   @Column('json')
   keys: string[];
 
-  
-
-  @Column({ default: false })
-  available: boolean;
-
   @ManyToMany(() => IngredientCategory, (category) => category.ingredients)
   categories: IngredientCategory[];
 

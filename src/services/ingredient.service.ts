@@ -29,7 +29,6 @@ export class IngredientService {
   create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {
     const ingredient = this.ingredientRepository.create({
       name: createIngredientDto.name,
-      available: createIngredientDto.available ?? false,
     });
     return this.ingredientRepository.save(ingredient);
   }
@@ -43,14 +42,4 @@ export class IngredientService {
     const result = await this.ingredientRepository.delete(id);
     return (result.affected ?? 0) > 0;
   }
-
-  async toggleAvailability(id: string): Promise<Ingredient | null> {
-    const ingredient = await this.findOne(id);
-    if (!ingredient) {
-      return null;
-    }
-    ingredient.available = !ingredient.available;
-    return this.ingredientRepository.save(ingredient);
-  }
 }
-
