@@ -1,8 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  Generated,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
@@ -14,8 +13,7 @@ import { Recipe } from './recipe.entity';
 
 @Entity('ingredients')
 export class Ingredient {
-  @PrimaryColumn({ type: 'char', length: 36 })
-  @Generated('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()

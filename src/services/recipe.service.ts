@@ -68,7 +68,39 @@ export class RecipeService {
 }
 
   async update(id: string, updateRecipeDto: UpdateRecipeDto): Promise<Recipe | null> {
-    await this.recipeRepository.update(id, updateRecipeDto);
+    const recipe = await this.recipeRepository.findOne({
+      where: { id },
+      relations: ['ingredients'],
+    });
+    if (!recipe) throw new NotFoundException('Receta no encontrada');
+
+    const ingredientIds = [...new Set(updateRecipeDto.ingredients.map((i) => i.id))];
+    const dbIngredients = await this.ingredientRepo.findBy({ id: In(ingredientIds) });
+    if (dbIngredients.length !== ingredientIds.length) {
+      const dbIds = new Set(dbIngredients.map((i) => i.id));
+      const missing = ingredientIds.filter((x) => !dbIds.has(x));
+      throw new NotFoundException(`Ingredientes no válidos: ${missing.join(', ')}`);
+    }
+
+    const byId = new Map(dbIngredients.map((i) => [i.id, i]));
+
+    // Campos simples
+    recipe.name = updateRecipeDto.name;
+    recipe.description = updateRecipeDto.description;
+    recipe.instructions = updateRecipeDto.instructions;
+
+    // Reemplazo completo de la relación (cascade + orphanedRowAction se encargan)
+    recipe.ingredients = updateRecipeDto.ingredients.map((item) =>
+      this.recipeIngredientRepository.create({
+        ...(item.recipeIngredientId ? { id: item.recipeIngredientId } : {}),
+        quantity: item.quantity,
+        unit: item.unit,
+        ingredient: byId.get(item.id)!,
+        recipe,
+      }),
+    );
+
+    await this.recipeRepository.save(recipe);
     return this.findOne(id);
   }
 

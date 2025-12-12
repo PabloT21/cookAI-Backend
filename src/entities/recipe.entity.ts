@@ -1,8 +1,7 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  Generated,
+  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
@@ -17,8 +16,7 @@ import {User} from "./user.entity";
 
 @Entity('recipes')
 export class Recipe {
-  @PrimaryColumn({ type: 'char', length: 36 })
-  @Generated('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
@@ -42,7 +40,10 @@ export class Recipe {
   @ManyToOne(() => User)
     user: User;
   
-  @OneToMany(() => RecipeIngredient, (RI) => RI.recipe)
+  @OneToMany(() => RecipeIngredient, (RI) => RI.recipe, {
+    cascade: true,
+    orphanedRowAction: 'delete',
+  })
     ingredients: RecipeIngredient[];
 
   @ManyToMany(() => RecipeTag, (tag) => tag.recipes)

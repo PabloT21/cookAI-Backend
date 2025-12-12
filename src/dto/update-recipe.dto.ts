@@ -1,5 +1,7 @@
 import { ArrayMinSize, Min, MinLength, ValidateNested } from 'class-validator';
 export class IngredientInputDto {
+  // Si viene, TypeORM actualiza el RecipeIngredient; si no, crea uno nuevo
+  recipeIngredientId?: number;
   id: string;
   name: string;
   @Min(1)
