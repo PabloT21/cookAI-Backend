@@ -376,7 +376,17 @@ async function main() {
 
     // 3) Crear usuario seed (si no existe)
     console.log('[seed] Creando usuario seed...');
-    const seedUser = await upsertByName(userRepo, 'Seed');
+    let seedUser = await userRepo.findOne({
+      where: { email: 'seed@cookai.com' },
+    });
+    if (!seedUser) {
+      seedUser = userRepo.create({
+        name: 'Seed User',
+        email: 'seed@cookai.com',
+        password: 'seed_password', // Contraseña por defecto para seed
+      });
+      seedUser = await userRepo.save(seedUser);
+    }
     console.log('[seed] ✓ Usuario seed listo');
 
     // 4) Crear recetas
