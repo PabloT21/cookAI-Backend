@@ -6,7 +6,8 @@ import {
   UpdateDateColumn,
   ManyToMany,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  JoinTable,
 } from 'typeorm';
 
 import { Ingredient } from './ingredient.entity';
@@ -40,7 +41,8 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.createdRecipes)
+  @JoinTable()
     user: User;
 
   @ManyToMany(() => User, (user) => user.favoriteRecipes)
@@ -54,6 +56,6 @@ export class Recipe {
 
   @ManyToMany(() => RecipeTag, (tag) => tag.recipes)
     tags: RecipeTag[];
-
+  
 }
 
