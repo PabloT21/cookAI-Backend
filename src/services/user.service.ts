@@ -5,6 +5,7 @@ import { User } from '../entities/user.entity';
 import { Ingredient } from 'src/entities/ingredient.entity';
 import { Recipe } from 'src/entities/recipe.entity';
 import { CreateUserDto } from 'src/dto/create-user.dto';
+import * as argon2 from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -33,6 +34,8 @@ export class UserService {
   async create(createUserDto: CreateUserDto): Promise<User | null> {
      const user = this.userRepository.create({
       name: createUserDto.name,
+      email: createUserDto.email,
+      password: await argon2.hash(createUserDto.password),
     });
     await this.userRepository.save(user);
     return user;
