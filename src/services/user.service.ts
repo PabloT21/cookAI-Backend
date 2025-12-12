@@ -1,8 +1,52 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
+import { Ingredient } from 'src/entities/ingredient.entity';
+import { Recipe } from 'src/entities/recipe.entity';
+import { CreateUserDto } from 'src/dto/create-user.dto';
 
 @Injectable()
 export class UserService {
-  getUsers() {
-    return 'Hello World';
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+    @InjectRepository(Ingredient)
+    private ingredientRepository: Repository<Ingredient>, 
+    @InjectRepository(Ingredient)
+    private recipeRepository: Repository<Recipe>,
+  ) {}
+
+    findAll(): Promise<User[]> {
+    return this.userRepository.find({
+      relations: ['ingredients', 'tags', 'createdRecipes', 'favoriteRecipes'], // agregar calendarEvent cuando se cree
+    });
   }
+
+  findOne(id: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { id },
+      relations: ['ingredients', 'tags', 'createdRecipes', 'favoriteRecipes'], // agregar calendarEvent cuando se cree
+    });
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<User | null> {
+     const user = this.userRepository.create({
+      name: createUserDto.name,
+    });
+    await this.userRepository.save(user);
+    return user;
+  }
+
+  //async update(id: string, updateUserDto: CreateUserDto): Promise<User | null> {
+    //const user = await this.userRepository.findOne({ where: { id } });
+    //if (!user) {
+    //throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    //}
+
+  async remove(id: string): Promise<boolean> {
+    const result = await this.userRepository.delete(id) || 0;
+    return (result.affected ?? 0) > 0;
+  }
+
 }
