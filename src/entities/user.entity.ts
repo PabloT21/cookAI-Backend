@@ -21,6 +21,12 @@ export class User {
   @Column()
   name: string;
 
+  @Column({ unique: true })
+  email: string;
+
+  @Column()
+  password: string;
+
   
   @ManyToMany(() => Ingredient, (ingredient) => ingredient.users)
   @JoinTable()
