@@ -7,7 +7,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  JoinTable
+  JoinTable,
 } from 'typeorm';
 
 import { Ingredient } from './ingredient.entity';
@@ -41,7 +41,8 @@ export class Recipe {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.createdRecipes)
+  @JoinTable()
     user: User;
 
   @ManyToMany(() => User, (user) => user.favoriteRecipes)
@@ -60,6 +61,6 @@ export class Recipe {
     inverseJoinColumn: { name: 'recipe_tag_id', referencedColumnName: 'id' },
   })
     tags: RecipeTag[];
-
+  
 }
 
