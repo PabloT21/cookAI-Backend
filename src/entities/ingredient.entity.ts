@@ -9,7 +9,8 @@ import {
 } from 'typeorm';
 import { IngredientCategory } from './ingredientCategory.entity';
 import { RecipeIngredient } from './recipe-ingredient.entity';
-import { Recipe } from './recipe.entity';
+import { User } from './user.entity';
+
 
 @Entity('ingredients')
 export class Ingredient {
@@ -27,6 +28,9 @@ export class Ingredient {
 
   @OneToMany(() => RecipeIngredient, (RI) => RI.ingredient)
   recipes: RecipeIngredient[];
+
+  @ManyToMany(() => User, (user) => user.ingredients)
+  users: User[];
 
   @CreateDateColumn()
   createdAt: Date;

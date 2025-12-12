@@ -39,6 +39,9 @@ export class Recipe {
 
   @ManyToOne(() => User)
     user: User;
+
+  @ManyToMany(() => User, (user) => user.favoriteRecipes)
+    favoritedBy: User[];
   
   @OneToMany(() => RecipeIngredient, (RI) => RI.recipe, {
     cascade: true,
