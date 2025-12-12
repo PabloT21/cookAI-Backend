@@ -9,7 +9,7 @@ import {
 
 import { Recipe } from './recipe.entity';
 
-@Entity('recipes')
+@Entity('recipe_tags')
 export class RecipeTag {
   @PrimaryGeneratedColumn('uuid')
   id: string;

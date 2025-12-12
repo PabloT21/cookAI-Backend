@@ -35,6 +35,9 @@ export class RecipeService {
   async create(createRecipeDto: CreateRecipeDto): Promise<Recipe | null> {
      const recipe = this.recipeRepository.create({
       name: createRecipeDto.name,
+      instructions: createRecipeDto.instructions,
+      time: createRecipeDto.time,
+      difficulty: createRecipeDto.difficulty,
     });
     await this.recipeRepository.save(recipe);
     const relations: RecipeIngredient[] = []
@@ -86,8 +89,9 @@ export class RecipeService {
 
     // Campos simples
     recipe.name = updateRecipeDto.name;
-    recipe.description = updateRecipeDto.description;
     recipe.instructions = updateRecipeDto.instructions;
+    recipe.time = updateRecipeDto.time;
+    recipe.difficulty = updateRecipeDto.difficulty;
 
     // Reemplazo completo de la relación (cascade + orphanedRowAction se encargan)
     recipe.ingredients = updateRecipeDto.ingredients.map((item) =>

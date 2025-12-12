@@ -23,13 +23,16 @@ export class Recipe {
   name: string;
 
   @Column()
-  description: string;
-
-  @Column()
   instructions: string;
   
   @Column('json')
   keys: string[];
+
+  @Column({ nullable: true })
+  time?: number;
+
+  @Column({ nullable: true })
+  difficulty?: number;
 
   @CreateDateColumn()
   createdAt: Date;

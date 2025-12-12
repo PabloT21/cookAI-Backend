@@ -12,3 +12,4 @@ import { IngredientCategory } from '../entities/ingredientCategory.entity';
 })
 export class IngredientCategoryModule {}
 
+

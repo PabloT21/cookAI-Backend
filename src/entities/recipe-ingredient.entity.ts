@@ -28,7 +28,7 @@ export class RecipeIngredient {
   recipe: Recipe;
 
   @ManyToOne(() => Ingredient, ingredient => ingredient.recipes, {
-    onDelete: 'CASCADE',
+    onDelete: 'RESTRICT',
   })
   ingredient: Ingredient;
 }

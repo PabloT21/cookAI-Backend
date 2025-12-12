@@ -15,7 +15,8 @@ export class UpdateRecipeDto {
   @MinLength(1)
   name: string;
   instructions: string;
-  description: string;
+  time?: number;
+  difficulty?: number;
   @ValidateNested({ each: true })
   @ArrayMinSize(1) 
   ingredients: IngredientInputDto[];
