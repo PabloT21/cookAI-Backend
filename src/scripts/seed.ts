@@ -387,7 +387,6 @@ async function main() {
     for (const recetaData of recetas) {
       const existing = await recipeRepo.findOne({
         where: { name: recetaData.name },
-        relations: ['ingredients', 'ingredients.ingredient', 'tags'],
       });
 
       // Generar keys desde el nombre y los ingredientes
@@ -395,14 +394,6 @@ async function main() {
         recetaData.name.toLowerCase(),
         ...recetaData.ingredients.map((i) => i.toLowerCase()),
       ]);
-
-      const recipe = existing ?? recipeRepo.create();
-      recipe.name = recetaData.name;
-      recipe.instructions = recetaData.instructions;
-      recipe.keys = keys;
-      recipe.time = recetaData.time;
-      recipe.difficulty = recetaData.difficulty;
-      (recipe as any).user = seedUser;
 
       // Mapear ingredientes por nombre (strings) a entidades
       const recipeIngredients: RecipeIngredient[] = [];
@@ -419,7 +410,6 @@ async function main() {
             ingredient: ing,
             quantity: 1, // Valor por defecto, ya que no viene en los datos
             unit: 'u', // Valor por defecto
-            recipe,
           }),
         );
       }
@@ -433,15 +423,35 @@ async function main() {
         }
       }
 
-      recipe.ingredients = recipeIngredients;
-      recipe.tags = recipeTags;
-
-      await recipeRepo.save(recipe);
+      let recipe: Recipe;
       if (existing) {
+        // Actualizar receta existente
+        recipe = existing;
+        recipe.name = recetaData.name;
+        recipe.instructions = recetaData.instructions;
+        recipe.keys = keys;
+        recipe.time = recetaData.time;
+        recipe.difficulty = recetaData.difficulty;
+        recipe.user = seedUser;
+        recipe.ingredients = recipeIngredients;
+        recipe.tags = recipeTags;
         updated++;
       } else {
+        // Crear nueva receta
+        recipe = recipeRepo.create({
+          name: recetaData.name,
+          instructions: recetaData.instructions,
+          keys,
+          time: recetaData.time,
+          difficulty: recetaData.difficulty,
+          user: seedUser,
+          ingredients: recipeIngredients,
+          tags: recipeTags,
+        });
         created++;
       }
+
+      await recipeRepo.save(recipe);
     }
 
     console.log(`[seed] ✓ ${created} recetas creadas, ${updated} actualizadas`);

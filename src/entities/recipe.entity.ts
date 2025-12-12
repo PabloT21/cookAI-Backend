@@ -6,7 +6,8 @@ import {
   UpdateDateColumn,
   ManyToMany,
   ManyToOne,
-  OneToMany
+  OneToMany,
+  JoinTable
 } from 'typeorm';
 
 import { Ingredient } from './ingredient.entity';
@@ -53,6 +54,11 @@ export class Recipe {
     ingredients: RecipeIngredient[];
 
   @ManyToMany(() => RecipeTag, (tag) => tag.recipes)
+  @JoinTable({
+    name: 'recipe_recipe_tags',
+    joinColumn: { name: 'recipe_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'recipe_tag_id', referencedColumnName: 'id' },
+  })
     tags: RecipeTag[];
 
 }
