@@ -19,14 +19,14 @@ export class UserService {
 
     findAll(): Promise<User[]> {
     return this.userRepository.find({
-      relations: ['ingredients', 'tags', 'createdRecipes', 'favoriteRecipes'], // agregar calendarEvent cuando se cree
+      relations: ['ingredients', 'createdRecipes', 'favoriteRecipes'], // agregar calendarEvent cuando se cree
     });
   }
 
   findOne(id: string): Promise<User | null> {
     return this.userRepository.findOne({
       where: { id },
-      relations: ['ingredients', 'tags', 'createdRecipes', 'favoriteRecipes'], // agregar calendarEvent cuando se cree
+      relations: ['ingredients', 'createdRecipes', 'favoriteRecipes'], // agregar calendarEvent cuando se cree
     });
   }
 

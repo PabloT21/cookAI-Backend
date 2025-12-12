@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { IngredientModule } from './modules/ingredient.module';
 import { IngredientCategoryModule } from './modules/ingredient-category.module';
 import { ConfigModule } from '@nestjs/config';
+import { User } from './entities/user.entity';
+import { UsersModule } from './modules/user.module';
 
 @Module({
   imports: [ ConfigModule.forRoot({
@@ -20,6 +22,7 @@ import { ConfigModule } from '@nestjs/config';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true, // Solo para desarrollo, en producción usar migraciones
     }),
+    UsersModule,
     IngredientModule,
     IngredientCategoryModule,
   ],
