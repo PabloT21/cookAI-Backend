@@ -7,6 +7,7 @@ import { IngredientCategoryModule } from './modules/ingredient-category.module';
 import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { UsersModule } from './modules/user.module';
+import { AuthModule } from './modules/auth.module';
 
 @Module({
   imports: [ ConfigModule.forRoot({
@@ -25,6 +26,7 @@ import { UsersModule } from './modules/user.module';
     UsersModule,
     IngredientModule,
     IngredientCategoryModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

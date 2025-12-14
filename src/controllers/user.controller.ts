@@ -45,4 +45,3 @@ export class UsersController {
     return null;
   }
 }
-
