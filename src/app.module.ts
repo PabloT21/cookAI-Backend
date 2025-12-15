@@ -8,7 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { UsersModule } from './modules/user.module';
 import { AuthModule } from './modules/auth.module';
-
+import { Recipe } from './entities/recipe.entity';
+import { RecipeModule } from './modules/recipe.module';
 @Module({
   imports: [ ConfigModule.forRoot({
       isGlobal: true,
@@ -27,6 +28,7 @@ import { AuthModule } from './modules/auth.module';
     IngredientModule,
     IngredientCategoryModule,
     AuthModule,
+    RecipeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

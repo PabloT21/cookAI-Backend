@@ -18,7 +18,3 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     };
   }
 }
-
-  // curl -X POST http://localhost:4000/auth/login ^
-  //-H "Content-Type: application/json" ^
-  //-d "{\"email\":\"juan@test.com\",\"password\":\"123456\"}"
