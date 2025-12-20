@@ -6,7 +6,7 @@ import { UpdateRecipeDto } from '../dto/update-recipe.dto';
 import { Recipe } from '../entities/recipe.entity';
 import { RecipeIngredient } from 'src/entities/recipe-ingredient.entity';
 import { Ingredient } from 'src/entities/ingredient.entity';
-
+import { ResponseHandlerService } from './response-handler.service';
 
 @Injectable()
 export class RecipeService {
@@ -14,15 +14,22 @@ export class RecipeService {
     @InjectRepository(Recipe)
     private recipeRepository: Repository<Recipe>,
     @InjectRepository(RecipeIngredient)
-    private recipeIngredientRepository: Repository<RecipeIngredient>, 
+    private recipeIngredientRepository: Repository<RecipeIngredient>,
     @InjectRepository(Ingredient)
     private ingredientRepo: Repository<Ingredient>,
+    private responseHandler: ResponseHandlerService,
   ) {}
 
-  findAll(): Promise<Recipe[]> {
-    return this.recipeRepository.find({
-      relations: ['ingredients', 'ingredients.ingredient', 'tags'],
-    });
+  async findAll(): Promise<Recipe[]> {
+    try {
+      const recipes = await this.recipeRepository.find({
+        relations: ['ingredients', 'ingredients.ingredient', 'tags'],
+      });
+      return recipes || [];
+    } catch (error) {
+      console.error('Error en RecipeService.findAll:', error);
+      throw error;
+    }
   }
 
   findOne(id: string): Promise<Recipe | null> {

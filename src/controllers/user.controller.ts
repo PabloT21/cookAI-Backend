@@ -1,33 +1,46 @@
 import {
   Controller,
-  Get, Post, Put, Patch, Delete,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
   Body,
   Param,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { CreateUserDto } from "../dto/create-user.dto";
-
+import { CreateUserDto } from '../dto/create-user.dto';
+import { ResponseHandlerService } from '../services/response-handler.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly responseHandler: ResponseHandlerService,
+  ) {}
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  async findAll() {
+    const users = await this.userService.findAll();
+    return this.responseHandler.success(users);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const user = await this.userService.findOne(id);
+    if (!user) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.success(user);
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createRecipeDto: CreateUserDto) {
-    return this.userService.create(createRecipeDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const user = await this.userService.create(createUserDto);
+    if (!user) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.created(user);
   }
 
   //@Put(':id')
@@ -36,13 +49,12 @@ export class UsersController {
   // }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     const deleted = await this.userService.remove(id);
     if (!deleted) {
-      return { message: 'Receta no encontrado' };
+      this.responseHandler.notFound();
     }
-    return null;
+    return this.responseHandler.deleted();
   }
 }
 

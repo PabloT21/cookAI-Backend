@@ -6,51 +6,59 @@ import {
   Delete,
   Body,
   Param,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { IngredientCategoryService } from '../services/ingredient-category.service';
 import { CreateIngredientCategoryDto } from '../dto/create-ingredient-category.dto';
 import { UpdateIngredientCategoryDto } from '../dto/update-ingredient-category.dto';
+import { ResponseHandlerService } from '../services/response-handler.service';
 
 @Controller('ingredient-categories')
 export class IngredientCategoryController {
   constructor(
     private readonly categoryService: IngredientCategoryService,
+    private readonly responseHandler: ResponseHandlerService,
   ) {}
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  async findAll() {
+    const categories = await this.categoryService.findAll();
+    return this.responseHandler.success(categories);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const category = await this.categoryService.findOne(id);
+    if (!category) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.success(category);
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createCategoryDto: CreateIngredientCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
+  async create(@Body() createCategoryDto: CreateIngredientCategoryDto) {
+    const category = await this.categoryService.create(createCategoryDto);
+    return this.responseHandler.created(category);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateIngredientCategoryDto,
   ) {
-    return this.categoryService.update(id, updateCategoryDto);
+    const category = await this.categoryService.update(id, updateCategoryDto);
+    if (!category) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.updated(category);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     const deleted = await this.categoryService.remove(id);
     if (!deleted) {
-      return { message: 'Categoría no encontrada' };
+      this.responseHandler.notFound();
     }
-    return null;
+    return this.responseHandler.deleted();
   }
 }
 

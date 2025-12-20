@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, Optional } from '@nestjs/common';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 // Tipos para respuestas estandarizadas
@@ -17,44 +17,62 @@ export interface ApiErrorResponse {
   errors?: any; // Para errores de validación
 }
 
+// Interfaz para la configuración del ResponseHandler
+export interface ResponseHandlerConfig {
+  entityName?: string;
+}
+
+// Token para la inyección de configuración
+export const RESPONSE_HANDLER_CONFIG = 'RESPONSE_HANDLER_CONFIG';
+
 @Injectable()
 export class ResponseHandlerService {
+  private config: ResponseHandlerConfig;
+
+  constructor(
+    @Optional()
+    @Inject(RESPONSE_HANDLER_CONFIG)
+    config?: ResponseHandlerConfig,
+  ) {
+    this.config = config || {};
+  }
   /**
    * Respuesta exitosa genérica
    * @param data - Datos a retornar (puede ser cualquier tipo)
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, se genera automáticamente si no se proporciona)
    * @param statusCode - Código de estado HTTP (opcional, por defecto 200)
    */
   success<T = any>(
     data: T,
-    message?: string,
+    messageCode?: string,
     statusCode: number = HttpStatus.OK,
   ): ApiResponse<T> {
+    const code = messageCode || this.buildGenericMessage('success');
     return {
       success: true,
       data,
-      message: message ?? 'Operación exitosa',
+      message: code,
       statusCode,
     };
   }
 
   /**
    * Respuesta de error genérica
-   * @param message - Mensaje de error
+   * @param messageCode - Código del mensaje de error
    * @param statusCode - Código de estado HTTP (por defecto 400)
    * @param error - Tipo de error (opcional)
    * @param errors - Errores de validación o detalles adicionales (opcional)
    */
   error(
-    message: string,
+    messageCode: string,
     statusCode: number = HttpStatus.BAD_REQUEST,
     error?: string,
     errors?: any,
   ): ApiErrorResponse {
     return {
       success: false,
-      message,
-      error: error || 'Error',
+      message: messageCode,
+      error: error || 'error',
       statusCode,
       ...(errors && { errors }),
     };
@@ -62,20 +80,20 @@ export class ResponseHandlerService {
 
   /**
    * Lanza una excepción HTTP estandarizada
-   * @param message - Mensaje de error
+   * @param messageCode - Código del mensaje de error
    * @param statusCode - Código de estado HTTP (por defecto 400)
    * @param error - Tipo de error (opcional)
    */
   throwError(
-    message: string,
+    messageCode: string,
     statusCode: number = HttpStatus.BAD_REQUEST,
     error?: string,
   ): never {
     throw new HttpException(
       {
         success: false,
-        message,
-        error: error || 'Error',
+        message: messageCode,
+        error: error || 'error',
         statusCode,
       },
       statusCode,
@@ -85,58 +103,60 @@ export class ResponseHandlerService {
   /**
    * Respuesta de creación exitosa (201)
    * @param data - Datos del recurso creado
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, se genera automáticamente)
    */
   created<T = any>(
     data: T,
-    message?: string,
+    messageCode?: string,
   ): ApiResponse<T> {
-    return this.success(data, message, HttpStatus.CREATED);
+    const code = messageCode || this.buildGenericMessage('created');
+    return this.success(data, code, HttpStatus.CREATED);
   }
 
   /**
    * Respuesta de actualización exitosa (200)
    * @param data - Datos del recurso actualizado
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, se genera automáticamente)
    */
   updated<T = any>(
     data: T,
-    message?: string,
+    messageCode?: string,
   ): ApiResponse<T> {
-    return this.success(data, message, HttpStatus.OK);
+    const code = messageCode || this.buildGenericMessage('updated');
+    return this.success(data, code, HttpStatus.OK);
   }
 
   /**
    * Respuesta de eliminación exitosa (200)
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, se genera automáticamente)
    */
-  deleted(message?: string): ApiResponse<null> {
-    return this.success(null, message, HttpStatus.OK);
+  deleted(messageCode?: string): ApiResponse<null> {
+    const code = messageCode || this.buildGenericMessage('deleted');
+    return this.success(null, code, HttpStatus.OK);
   }
 
   /**
    * Respuesta de recurso no encontrado (404)
-   * @param resource - Nombre del recurso (opcional)
+   * @param resourceCode - Código del recurso (opcional, usa entityName de config si no se proporciona)
    */
-  notFound(resource: string = 'Recurso'): never {
-    return this.throwError(
-      `${resource} no encontrado`,
-      HttpStatus.NOT_FOUND,
-      'Not Found',
-    );
+  notFound(resourceCode?: string): never {
+    const code = resourceCode 
+      ? `${resourceCode}_not_found`
+      : this.buildGenericMessage('not_found');
+    return this.throwError(code, HttpStatus.NOT_FOUND, 'not_found');
   }
 
   /**
    * Respuesta de error de validación (400)
    * @param errors - Errores de validación
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, por defecto 'validation_error')
    */
-  validationError(errors: any, message: string = 'Error de validación'): never {
+  validationError(errors: any, messageCode: string = 'validation_error'): never {
     throw new HttpException(
       {
         success: false,
-        message,
-        error: 'Bad Request',
+        message: messageCode,
+        error: 'validation_error',
         statusCode: HttpStatus.BAD_REQUEST,
         errors,
       },
@@ -146,25 +166,32 @@ export class ResponseHandlerService {
 
   /**
    * Respuesta de conflicto (409)
-   * @param message - Mensaje descriptivo
+   * @param messageCode - Código del mensaje (opcional, por defecto 'resource_already_exists')
    */
-  conflict(message: string = 'El recurso ya existe'): never {
-    return this.throwError(message, HttpStatus.CONFLICT, 'Conflict');
+  conflict(messageCode: string = 'resource_already_exists'): never {
+    return this.throwError(messageCode, HttpStatus.CONFLICT, 'conflict');
   }
 
   /**
    * Respuesta de no autorizado (401)
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, por defecto 'unauthorized')
    */
-  unauthorized(message: string = 'No autorizado'): never {
-    return this.throwError(message, HttpStatus.UNAUTHORIZED, 'Unauthorized');
+  unauthorized(messageCode: string = 'unauthorized'): never {
+    return this.throwError(messageCode, HttpStatus.UNAUTHORIZED, 'unauthorized');
   }
 
   /**
    * Respuesta de prohibido (403)
-   * @param message - Mensaje descriptivo (opcional)
+   * @param messageCode - Código del mensaje (opcional, por defecto 'forbidden')
    */
-  forbidden(message: string = 'Acceso prohibido'): never {
-    return this.throwError(message, HttpStatus.FORBIDDEN, 'Forbidden');
+  forbidden(messageCode: string = 'forbidden'): never {
+    return this.throwError(messageCode, HttpStatus.FORBIDDEN, 'forbidden');
+  }
+
+
+  // Funciones helper para las respuestas
+  private buildGenericMessage(event: string): string {
+    const entityName = this.config.entityName || 'resource';
+    return `${entityName}_${event}`;
   }
 }

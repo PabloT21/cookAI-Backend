@@ -4,12 +4,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { IngredientModule } from './modules/ingredient.module';
 import { IngredientCategoryModule } from './modules/ingredient-category.module';
+import { RecipeModule } from './modules/recipe.module';
 import { ConfigModule } from '@nestjs/config';
 import { User } from './entities/user.entity';
 import { UsersModule } from './modules/user.module';
 
 @Module({
-  imports: [ ConfigModule.forRoot({
+  imports: [
+    ConfigModule.forRoot({
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({
@@ -25,6 +27,7 @@ import { UsersModule } from './modules/user.module';
     UsersModule,
     IngredientModule,
     IngredientCategoryModule,
+    RecipeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

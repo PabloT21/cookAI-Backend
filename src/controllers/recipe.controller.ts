@@ -1,49 +1,73 @@
 import {
   Controller,
-  Get, Post, Put, Patch, Delete,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
   Body,
   Param,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { RecipeService } from '../services/recipe.service';
-import {CreateRecipeDto} from "../dto/create-recipe.dto";
-import {UpdateRecipeDto} from "../dto/update-recipe.dto";
-
+import { CreateRecipeDto } from '../dto/create-recipe.dto';
+import { UpdateRecipeDto } from '../dto/update-recipe.dto';
+import { ResponseHandlerService } from '../services/response-handler.service';
 
 @Controller('recipes')
 export class RecipeController {
-  constructor(private readonly recipeService: RecipeService) {}
+  constructor(
+    private readonly recipeService: RecipeService,
+    private readonly responseHandler: ResponseHandlerService,
+  ) {}
 
   @Get()
-  findAll() {
-    return this.recipeService.findAll();
+  async findAll() {
+    try {
+      const recipes = await this.recipeService.findAll();
+      return this.responseHandler.success(recipes);
+    } catch (error) {
+      console.error('Error en findAll:', error);
+      throw error;
+    }
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.recipeService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const recipe = await this.recipeService.findOne(id);
+    if (!recipe) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.success(recipe);
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createRecipeDto: CreateRecipeDto) {
-    return this.recipeService.create(createRecipeDto);
+  async create(@Body() createRecipeDto: CreateRecipeDto) {
+    const recipe = await this.recipeService.create(createRecipeDto);
+    if (!recipe) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.created(recipe);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateRecipeDto: UpdateRecipeDto) {
-    return this.recipeService.update(id, updateRecipeDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateRecipeDto: UpdateRecipeDto,
+  ) {
+    const recipe = await this.recipeService.update(id, updateRecipeDto);
+    if (!recipe) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.updated(recipe);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     const deleted = await this.recipeService.remove(id);
     if (!deleted) {
-      return { message: 'Receta no encontrado' };
+      this.responseHandler.notFound();
     }
-    return null;
+    return this.responseHandler.deleted();
   }
 }
 

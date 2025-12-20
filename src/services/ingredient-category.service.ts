@@ -4,13 +4,14 @@ import { Repository } from 'typeorm';
 import { IngredientCategory } from '../entities/ingredientCategory.entity';
 import { CreateIngredientCategoryDto } from '../dto/create-ingredient-category.dto';
 import { UpdateIngredientCategoryDto } from '../dto/update-ingredient-category.dto';
+import { ResponseHandlerService } from './response-handler.service';
 
 @Injectable()
 export class IngredientCategoryService {
   constructor(
     @InjectRepository(IngredientCategory)
     private categoryRepository: Repository<IngredientCategory>,
-    
+    private responseHandler: ResponseHandlerService,
   ) {}
 
   findAll(): Promise<IngredientCategory[]> {

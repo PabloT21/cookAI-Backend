@@ -6,6 +6,7 @@ import { Ingredient } from 'src/entities/ingredient.entity';
 import { Recipe } from 'src/entities/recipe.entity';
 import { CreateUserDto } from 'src/dto/create-user.dto';
 import * as argon2 from 'argon2';
+import { ResponseHandlerService } from './response-handler.service';
 
 @Injectable()
 export class UserService {
@@ -13,9 +14,10 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Ingredient)
-    private ingredientRepository: Repository<Ingredient>, 
+    private ingredientRepository: Repository<Ingredient>,
     @InjectRepository(Ingredient)
     private recipeRepository: Repository<Recipe>,
+    private responseHandler: ResponseHandlerService,
   ) {}
 
     findAll(): Promise<User[]> {

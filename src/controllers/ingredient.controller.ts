@@ -7,47 +7,62 @@ import {
   Delete,
   Body,
   Param,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { IngredientService } from '../services/ingredient.service';
 import { CreateIngredientDto } from '../dto/create-ingredient.dto';
 import { UpdateIngredientDto } from '../dto/update-ingredient.dto';
+import { ResponseHandlerService } from '../services/response-handler.service';
 
 @Controller('ingredients')
 export class IngredientController {
-  constructor(private readonly ingredientService: IngredientService) {}
+  constructor(
+    private readonly ingredientService: IngredientService,
+    private readonly responseHandler: ResponseHandlerService,
+  ) {}
 
   @Get()
-  findAll() {
-    return this.ingredientService.findAll();
+  async findAll() {
+    const ingredients = await this.ingredientService.findAll();
+    return this.responseHandler.success(ingredients);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ingredientService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    const ingredient = await this.ingredientService.findOne(id);
+    if (!ingredient) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.success(ingredient);
   }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createIngredientDto: CreateIngredientDto) {
-    return this.ingredientService.create(createIngredientDto);
+  async create(@Body() createIngredientDto: CreateIngredientDto) {
+    const ingredient = await this.ingredientService.create(createIngredientDto);
+    return this.responseHandler.created(ingredient);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateIngredientDto: UpdateIngredientDto) {
-    return this.ingredientService.update(id, updateIngredientDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateIngredientDto: UpdateIngredientDto,
+  ) {
+    const ingredient = await this.ingredientService.update(
+      id,
+      updateIngredientDto,
+    );
+    if (!ingredient) {
+      this.responseHandler.notFound();
+    }
+    return this.responseHandler.updated(ingredient);
   }
 
-
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
     const deleted = await this.ingredientService.remove(id);
     if (!deleted) {
-      return { message: 'Ingrediente no encontrado' };
+      this.responseHandler.notFound();
     }
-    return null;
+    return this.responseHandler.deleted();
   }
 }
 
