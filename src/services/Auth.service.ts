@@ -4,7 +4,7 @@ import { In, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { Ingredient } from 'src/entities/ingredient.entity';
 import { Recipe } from 'src/entities/recipe.entity';
-import { CreateUserDto } from 'src/dto/create-user.dto';
+import { CreateUserDto } from 'src/dto/users/create-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 

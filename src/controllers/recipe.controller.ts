@@ -9,8 +9,8 @@ import {
   Param,
 } from '@nestjs/common';
 import { RecipeService } from '../services/recipe.service';
-import { CreateRecipeDto } from '../dto/create-recipe.dto';
-import { UpdateRecipeDto } from '../dto/update-recipe.dto';
+import { CreateRecipeDto } from '../dto/recipes/create-recipe.dto';
+import { UpdateRecipeDto } from '../dto/recipes/update-recipe.dto';
 import { ResponseHandlerService } from '../services/response-handler.service';
 
 @Controller('recipes')

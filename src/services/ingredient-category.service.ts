@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IngredientCategory } from '../entities/ingredientCategory.entity';
-import { CreateIngredientCategoryDto } from '../dto/create-ingredient-category.dto';
-import { UpdateIngredientCategoryDto } from '../dto/update-ingredient-category.dto';
+import { CreateIngredientCategoryDto } from '../dto/ingredient-categories/create-ingredient-category.dto';
+import { UpdateIngredientCategoryDto } from '../dto/ingredient-categories/update-ingredient-category.dto';
 import { ResponseHandlerService } from './response-handler.service';
 
 @Injectable()

@@ -10,7 +10,6 @@ import { User } from './entities/user.entity';
 import { UsersModule } from './modules/user.module';
 import { AuthModule } from './modules/auth.module';
 import { Recipe } from './entities/recipe.entity';
-import { RecipeModule } from './modules/recipe.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
