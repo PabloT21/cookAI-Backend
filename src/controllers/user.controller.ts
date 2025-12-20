@@ -57,4 +57,3 @@ export class UsersController {
     return this.responseHandler.deleted();
   }
 }
-
