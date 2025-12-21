@@ -10,6 +10,8 @@ import { User } from './entities/user.entity';
 import { UsersModule } from './modules/user.module';
 import { AuthModule } from './modules/auth.module';
 import { Recipe } from './entities/recipe.entity';
+import { CalendarRecipe } from './entities/calendarRecipe.entity';
+import { CalendarRecipeModule } from './modules/calendar-recipe.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,7 +21,7 @@ import { Recipe } from './entities/recipe.entity';
       type: 'mysql',
       host: 'localhost',
       port: 3306,
-      username: 'root',
+      username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
@@ -30,6 +32,7 @@ import { Recipe } from './entities/recipe.entity';
     IngredientCategoryModule,
     AuthModule,
     RecipeModule,
+    CalendarRecipeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
