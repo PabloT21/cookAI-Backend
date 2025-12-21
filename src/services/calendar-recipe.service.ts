@@ -52,5 +52,6 @@ export class CalendarRecipeService {
     const result = await this.calendarRecipeRepository.delete(id);
     return (result.affected ?? 0) > 0;
   }
+
 }
 

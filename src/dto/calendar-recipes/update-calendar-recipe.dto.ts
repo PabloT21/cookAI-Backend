@@ -3,4 +3,5 @@ export class UpdateCalendarRecipeDto {
   date?: Date;
   recipeId?: string;
   userId?: string;
+  status?: string;
 }
