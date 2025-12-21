@@ -12,6 +12,7 @@ import {
 
 import { Recipe } from './recipe.entity';
 import { Ingredient } from './ingredient.entity';
+import { CalendarRecipe } from './calendarRecipe.entity';
 
 @Entity('users')
 export class User {
@@ -38,6 +39,9 @@ export class User {
   @ManyToMany(() => Recipe, (recipe) => recipe.favoritedBy)
   @JoinTable()
     favoriteRecipes: Recipe[];
+
+  @OneToMany(() => CalendarRecipe, (calendarRecipe) => calendarRecipe.user)
+    calendarRecipes: CalendarRecipe[];
 
   @CreateDateColumn()
   createdAt: Date;

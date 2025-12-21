@@ -14,6 +14,7 @@ import { Ingredient } from './ingredient.entity';
 import { RecipeTag } from './recipeTag.entity';
 import {RecipeIngredient} from "./recipe-ingredient.entity";
 import {User} from "./user.entity";
+import {CalendarRecipe} from "./calendarRecipe.entity";
 
 @Entity('recipes')
 export class Recipe {
@@ -47,6 +48,9 @@ export class Recipe {
 
   @ManyToMany(() => User, (user) => user.favoriteRecipes)
     favoritedBy: User[];
+
+  @OneToMany(() => CalendarRecipe, (calendarRecipe) => calendarRecipe.recipe)
+    calendarApparences: CalendarRecipe[];
   
   @OneToMany(() => RecipeIngredient, (RI) => RI.recipe, {
     cascade: true,
