@@ -8,7 +8,7 @@ export class AuthController{
     constructor(private readonly authService: AuthService){}
     @Post('login')
     login(@Body() body: { email: string; password: string }){
-    var jwt = this.authService.login(body.email, body.password)
+    return this.authService.login(body.email, body.password)
 
     }
 }
