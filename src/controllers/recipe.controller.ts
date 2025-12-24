@@ -7,10 +7,12 @@ import {
   Delete,
   Body,
   Param,
+  Query,
 } from '@nestjs/common';
 import { RecipeService } from '../services/recipe.service';
 import { CreateRecipeDto } from '../dto/recipes/create-recipe.dto';
 import { UpdateRecipeDto } from '../dto/recipes/update-recipe.dto';
+import { findByCriteriaRecipeDto } from 'src/dto/recipes/search-criteria-recipe.dto';
 import { ResponseHandlerService } from '../services/response-handler.service';
 
 @Controller('recipes')
@@ -31,11 +33,22 @@ export class RecipeController {
     }
   }
 
+  @Get('search')
+  async findByCriteria(@Query() criteria: findByCriteriaRecipeDto) {
+    try {
+      const recipes = await this.recipeService.findByCriteria(criteria);
+      return this.responseHandler.success(recipes);
+    } catch (error) {
+      console.error('Error en findByCriteria:', error);
+      throw error;
+    }
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const recipe = await this.recipeService.findOne(id);
     if (!recipe) {
-      this.responseHandler.notFound();
+      this.responseHandler.notFound('recipe');
     }
     return this.responseHandler.success(recipe);
   }

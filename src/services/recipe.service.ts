@@ -1,12 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { CreateRecipeDto } from '../dto/recipes/create-recipe.dto';
-import { UpdateRecipeDto } from '../dto/recipes/update-recipe.dto';
+
 import { Recipe } from '../entities/recipe.entity';
 import { RecipeIngredient } from 'src/entities/recipe-ingredient.entity';
 import { Ingredient } from 'src/entities/ingredient.entity';
 import { ResponseHandlerService } from './response-handler.service';
+// Import de DTOs
+import { CreateRecipeDto } from '../dto/recipes/create-recipe.dto';
+import { UpdateRecipeDto } from '../dto/recipes/update-recipe.dto';
+import { findByCriteriaRecipeDto } from 'src/dto/recipes/search-criteria-recipe.dto';
 
 @Injectable()
 export class RecipeService {
@@ -31,6 +34,44 @@ export class RecipeService {
       throw error;
     }
   }
+
+    async findByCriteria(criteria: findByCriteriaRecipeDto): Promise<Recipe[]> {
+      try {
+        const queryBuilder = this.recipeRepository
+          .createQueryBuilder('recipe')
+          .leftJoinAndSelect('recipe.ingredients', 'ingredients')
+          .leftJoinAndSelect('ingredients.ingredient', 'ingredient')
+          .leftJoinAndSelect('recipe.tags', 'tags');
+
+        // Filtro searchString: busca en nombre, instrucciones o nombre de ingrediente
+        if (criteria.searchString) {
+          const searchPattern = `%${criteria.searchString}%`;
+          queryBuilder.andWhere(
+            '(recipe.name LIKE :searchString OR recipe.instructions LIKE :searchString OR ingredient.name LIKE :searchString)',
+            { searchString: searchPattern }
+          );
+        }
+
+        // Filtro time: AND (menor o igual)
+        if (criteria.time !== undefined) {
+          queryBuilder.andWhere('recipe.time <= :time', { time: criteria.time });
+        }
+
+        // Filtro difficulty: AND (menor o igual)
+        if (criteria.difficulty !== undefined) {
+          queryBuilder.andWhere('recipe.difficulty <= :difficulty', { 
+            difficulty: criteria.difficulty 
+          });
+        }
+
+        queryBuilder.distinct(true);
+        const recipes = await queryBuilder.getMany();
+        return recipes || [];
+      } catch (error) {
+        console.error('Error en RecipeService.findByCriteria:', error);
+        throw error;
+      }
+    }
 
   findOne(id: string): Promise<Recipe | null> {
     return this.recipeRepository.findOne({
