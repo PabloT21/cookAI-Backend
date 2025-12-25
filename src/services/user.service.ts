@@ -54,4 +54,37 @@ export class UserService {
     return (result.affected ?? 0) > 0;
   }
 
+  async getUserIngredients(userId: string): Promise<Ingredient[]> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['ingredients'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    return user.ingredients || [];
+  }
+
+  async updateAvailableIngredients(
+    userId: string,
+    ingredientIds: string[],
+  ): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['ingredients'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
+
+    const ingredients = await this.ingredientRepository.find({
+      where: { id: In(ingredientIds) },
+    });
+
+    user.ingredients = ingredients;
+    return await this.userRepository.save(user);
+  }
 }
