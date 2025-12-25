@@ -7,6 +7,7 @@ import { Recipe } from '../entities/recipe.entity';
 import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
 import { RecipeTag } from '../entities/recipeTag.entity';
 import { User } from '../entities/user.entity';
+import * as argon2 from 'argon2';
 
 // Arrays de datos proporcionados
 const recetas = [
@@ -383,7 +384,7 @@ async function main() {
       seedUser = userRepo.create({
         name: 'Seed User',
         email: 'seed@cookai.com',
-        password: 'seed_password', // Contraseña por defecto para seed
+        password: await argon2.hash('seed_password'), // Contraseña por defecto para seed
       });
       seedUser = await userRepo.save(seedUser);
     }
