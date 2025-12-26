@@ -10,6 +10,7 @@ export class findByCriteriaRecipeDto {
   time?: number;
   difficulty?: number;
   ingredients?: IngredientSearchDto[];
+  onlyAvailable?: boolean;
 }
 
 

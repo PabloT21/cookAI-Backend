@@ -5,6 +5,7 @@ import { In, Repository } from 'typeorm';
 import { Recipe } from '../entities/recipe.entity';
 import { RecipeIngredient } from 'src/entities/recipe-ingredient.entity';
 import { Ingredient } from 'src/entities/ingredient.entity';
+import { User } from 'src/entities/user.entity';
 import { ResponseHandlerService } from './response-handler.service';
 // Import de DTOs
 import { CreateRecipeDto } from '../dto/recipes/create-recipe.dto';
@@ -20,6 +21,8 @@ export class RecipeService {
     private recipeIngredientRepository: Repository<RecipeIngredient>,
     @InjectRepository(Ingredient)
     private ingredientRepo: Repository<Ingredient>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private responseHandler: ResponseHandlerService,
   ) {}
 
@@ -35,7 +38,7 @@ export class RecipeService {
     }
   }
 
-    async findByCriteria(criteria: findByCriteriaRecipeDto): Promise<Recipe[]> {
+    async findByCriteria(criteria: findByCriteriaRecipeDto, userId?: string): Promise<Recipe[]> {
       try {
         const queryBuilder = this.recipeRepository
           .createQueryBuilder('recipe')
@@ -65,7 +68,11 @@ export class RecipeService {
         }
 
         queryBuilder.distinct(true);
-        const recipes = await queryBuilder.getMany();
+        var recipes = await queryBuilder.getMany();
+
+        if (criteria.onlyAvailable !== undefined && criteria.onlyAvailable == true && userId)
+           recipes = await this.#orderByAvailableIngredients(recipes, userId); 
+
         return recipes || [];
       } catch (error) {
         console.error('Error en RecipeService.findByCriteria:', error);
@@ -178,5 +185,50 @@ export class RecipeService {
     });
     await this.recipeIngredientRepository.save(recipeIngredient);
     return recipe;
-}
+  }
+
+  async #orderByAvailableIngredients(recipes: Recipe[], userId: string): Promise<Recipe[]> {
+    // obtener los ingredientes del usuario
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['ingredients'],
+    });
+    //si no tiene ingredientes se devuelve el array vacio
+    if (!user || !user.ingredients || user.ingredients.length === 0) {
+      return [];
+    }
+
+    // Crear un Set con los IDs de ingredientes disponibles del usuario para búsqueda rápida
+    const userIngredientIds = new Set(user.ingredients.map((ing) => ing.id));
+
+    // mapea cada receta con la proporcion de ingredientes que tiene el usuario del total
+    const recipesWithAvailability = recipes
+      .map((recipe) => {
+        const totalIngredients = recipe.ingredients.length;
+        const availableIngredients = recipe.ingredients.filter((ri) =>
+          userIngredientIds.has(ri.ingredient.id)
+        ).length;
+
+        const proportion = totalIngredients > 0 ? availableIngredients / totalIngredients : 0;
+
+        return {
+          recipe,
+          proportion,
+          availableIngredients,
+          totalIngredients,
+        };
+      })
+      .filter(({ proportion }) => proportion > 0) // Filtrar recetas que tengan al menos un ingrediente
+      .sort((a, b) => {
+        // Ordenar por proporción descendente (mayor proporción primero)
+        // Si las proporciones son iguales, ordenar por número de ingredientes disponibles descendente
+        if (b.proportion !== a.proportion) {
+          return b.proportion - a.proportion;
+        }
+        return b.availableIngredients - a.availableIngredients;
+      });
+
+    // extrae la solo la receta del mapeo
+    return recipesWithAvailability.map(({ recipe }) => recipe);
+  }
 }

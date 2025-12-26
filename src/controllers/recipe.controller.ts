@@ -8,7 +8,10 @@ import {
   Body,
   Param,
   Query,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RecipeService } from '../services/recipe.service';
 import { CreateRecipeDto } from '../dto/recipes/create-recipe.dto';
 import { UpdateRecipeDto } from '../dto/recipes/update-recipe.dto';
@@ -34,9 +37,11 @@ export class RecipeController {
   }
 
   @Get('search')
-  async findByCriteria(@Query() criteria: findByCriteriaRecipeDto) {
+  @UseGuards(JwtAuthGuard)
+  async findByCriteria(@Query() criteria: findByCriteriaRecipeDto, @Request() req: any) {
     try {
-      const recipes = await this.recipeService.findByCriteria(criteria);
+      const userId = req.user?.userId;
+      const recipes = await this.recipeService.findByCriteria(criteria, userId);
       return this.responseHandler.success(recipes);
     } catch (error) {
       console.error('Error en findByCriteria:', error);
