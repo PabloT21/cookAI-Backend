@@ -70,6 +70,10 @@ export class RecipeService {
         queryBuilder.distinct(true);
         var recipes = await queryBuilder.getMany();
 
+        if (criteria.ingredients !== undefined && criteria.ingredients.length > 0){
+          recipes = await this.#filterByIngredients(criteria.ingredients, recipes)
+        }
+
         if (criteria.onlyAvailable !== undefined && criteria.onlyAvailable == true && userId)
            recipes = await this.#orderByAvailableIngredients(recipes, userId); 
 
@@ -230,5 +234,24 @@ export class RecipeService {
 
     // extrae la solo la receta del mapeo
     return recipesWithAvailability.map(({ recipe }) => recipe);
+  }
+
+
+  //helper del search que filtra por ingrediente
+  async #filterByIngredients(requiredIngredientIds: string[], recipes: Recipe[]): Promise<Recipe[]> {
+
+    const requiredSet = new Set(requiredIngredientIds);
+
+    return recipes.filter((recipe) => {
+      const recipeIngredientIds = new Set(
+        (recipe.ingredients).map((ri) => ri.ingredient?.id)
+      );
+      // si alguno de los ingredientes no esta retorna falso y corta
+      for (const id of requiredSet) {
+        if (!recipeIngredientIds.has(id)) return false;
+      }
+      // si llega aca entonces estan todos y lo deja
+      return true;
+    });
   }
 }
