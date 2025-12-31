@@ -5,6 +5,7 @@ import { RecipeService } from '../services/recipe.service';
 import { Recipe } from '../entities/recipe.entity';
 import { RecipeIngredient } from '../entities/recipe-ingredient.entity';
 import { Ingredient } from '../entities/ingredient.entity';
+import { User } from '../entities/user.entity';
 import {
   ResponseHandlerService,
   RESPONSE_HANDLER_CONFIG,
@@ -12,7 +13,7 @@ import {
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient]),
+    TypeOrmModule.forFeature([Recipe, RecipeIngredient, Ingredient, User]),
   ],
   controllers: [RecipeController],
   providers: [

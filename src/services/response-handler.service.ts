@@ -1,21 +1,10 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ApiResponseDto, ApiErrorResponseDto } from '../dto/common/api-response.dto';
 
-// Tipos para respuestas estandarizadas
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data?: T;
-  message: string;
-  statusCode?: number;
-}
-
-export interface ApiErrorResponse {
-  success: false;
-  message: string;
-  error?: string;
-  statusCode: number;
-  errors?: any; // Para errores de validación
-}
+// Tipos para respuestas estandarizadas (alias para compatibilidad)
+export type ApiResponse<T = any> = ApiResponseDto<T>;
+export type ApiErrorResponse = ApiErrorResponseDto;
 
 // Interfaz para la configuración del ResponseHandler
 export interface ResponseHandlerConfig {

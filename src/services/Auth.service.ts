@@ -5,6 +5,7 @@ import { User } from '../entities/user.entity';
 import { Ingredient } from 'src/entities/ingredient.entity';
 import { Recipe } from 'src/entities/recipe.entity';
 import { CreateUserDto } from 'src/dto/users/create-user.dto';
+import { LoginResponseDto } from 'src/dto/auth/login-response.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
 
@@ -15,7 +16,7 @@ export class AuthService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
-  async login(email: string, password: string): Promise< {user: User, token:string}| null> {  
+  async login(email: string, password: string): Promise<LoginResponseDto | null> {  
     console.log(process.env.JWT_SECRET);
     console.log('JwtService options:', (this.jwtService as any).options);
     const user = await this.userRepository.findOne({ where: { email:email } });

@@ -7,6 +7,8 @@ import {
   Delete,
   Body,
   Param,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { RecipeService } from '../services/recipe.service';
 import { CreateCalendarRecipeDto } from '../dto/calendar-recipes/create-calendar-recipe.dto';
@@ -31,6 +33,43 @@ export class CalendarRecipeController {
       throw error;
     }
   }
+  @Get('events')
+  async findByRangeDate(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    if (!startDate) {
+      throw new BadRequestException('La fecha inicial (startDate) es obligatoria');
+    }
+
+    const startDateObj = new Date(startDate);
+    if (isNaN(startDateObj.getTime())) {
+      throw new BadRequestException('La fecha inicial (startDate) no es válida');
+    }
+
+    let endDateObj: Date | undefined;
+    if (endDate) {
+      endDateObj = new Date(endDate);
+      if (isNaN(endDateObj.getTime())) {
+        throw new BadRequestException('La fecha final (endDate) no es válida');
+      }
+    } else {
+      // Si no se proporciona endDate, usar la fecha de hoy
+      endDateObj = new Date();
+      endDateObj.setHours(23, 59, 59, 999); // Fin del día de hoy
+    }
+
+    try {
+      const calendarRecipes = await this.calendarRecipeService.findByRangeDate(
+        startDateObj,
+        endDateObj,
+      );
+      return this.responseHandler.success(calendarRecipes);
+    } catch (error) {
+      console.error('Error en findByRangeDate:', error);
+      throw error;
+    }
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -40,6 +79,7 @@ export class CalendarRecipeController {
     }
     return this.responseHandler.success(recipe);
   }
+
 
   @Post()
   async create(@Body() createCalendarRecipeDto: CreateCalendarRecipeDto) {

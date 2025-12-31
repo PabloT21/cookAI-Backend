@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 
 import { ResponseHandlerService } from './response-handler.service';
 import { UpdateIngredientCategoryDto } from 'src/dto/ingredient-categories/update-ingredient-category.dto';
@@ -26,6 +26,34 @@ export class CalendarRecipeService {
     return this.calendarRecipeRepository.findOne({
       where: { id },
     });
+  }
+
+  async findByRangeDate(
+    initialDate: Date,
+    endDate?: Date,
+  ): Promise<CalendarRecipe[]> {
+    try {
+      // Si no se proporciona endDate, usar la fecha de hoy
+      const finalDate = endDate || new Date();
+      
+      // Asegurar que initialDate sea el inicio del día
+      const startOfDay = new Date(initialDate);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      // Asegurar que finalDate sea el fin del día
+      const endOfDay = new Date(finalDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      return await this.calendarRecipeRepository.find({
+        where: {
+          date: Between(startOfDay, endOfDay),
+        },
+        relations: ['recipe', 'user'],
+      });
+    } catch (error) {
+      console.error('Error en CalendarRecipeService.findByRangeDate:', error);
+      throw error;
+    }
   }
 
   create(
