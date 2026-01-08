@@ -50,7 +50,7 @@ export class RecipeService {
         if (criteria.searchString) {
           const searchPattern = `%${criteria.searchString}%`;
           queryBuilder.andWhere(
-            '(recipe.name LIKE :searchString OR recipe.instructions LIKE :searchString OR ingredient.name LIKE :searchString)',
+            '(recipe.name LIKE :searchString OR ingredient.name LIKE :searchString)',
             { searchString: searchPattern }
           );
         }
