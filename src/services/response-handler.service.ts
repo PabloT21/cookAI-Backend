@@ -1,6 +1,7 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ApiResponseDto, ApiErrorResponseDto } from '../dto/common/api-response.dto';
+import { PaginatedResponseDto, PaginationMetaDto } from '../dto/common/pagination.dto';
 
 // Tipos para respuestas estandarizadas (alias para compatibilidad)
 export type ApiResponse<T = any> = ApiResponseDto<T>;
@@ -177,6 +178,36 @@ export class ResponseHandlerService {
     return this.throwError(messageCode, HttpStatus.FORBIDDEN, 'forbidden');
   }
 
+  /**
+   * Respuesta paginada exitosa
+   * @param data - Array de datos de la página actual
+   * @param total - Total de registros sin paginación
+   * @param page - Página actual
+   * @param limit - Límite de registros por página
+   * @param messageCode - Código del mensaje (opcional, se genera automáticamente)
+   * @param statusCode - Código de estado HTTP (opcional, por defecto 200)
+   */
+  paginated<T = any>(
+    data: T[],
+    total: number,
+    page: number,
+    limit: number,
+    messageCode?: string,
+    statusCode: number = HttpStatus.OK,
+  ): ApiResponse<PaginatedResponseDto<T>> {
+    const code = messageCode || this.buildGenericMessage('paginated');
+    const meta = new PaginationMetaDto(total, page, limit);
+    const paginatedData: PaginatedResponseDto<T> = {
+      data,
+      meta,
+    };
+    return {
+      success: true,
+      data: paginatedData,
+      message: code,
+      statusCode,
+    };
+  }
 
   // Funciones helper para las respuestas
   private buildGenericMessage(event: string): string {
