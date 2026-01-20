@@ -17,4 +17,5 @@ export class findByCriteriaRecipeDto extends PaginationQueryDto {
   difficulty?: number;
   ingredients?: IngredientSearchDto[];
   onlyAvailable?: boolean;
+  onlyFavorites?: boolean;
 }

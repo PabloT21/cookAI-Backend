@@ -49,6 +49,19 @@ export class RecipeController {
     }
   }
 
+  @Get('favorites')
+  @UseGuards(JwtAuthGuard)
+  async getFavorites(@Request() req: any) {
+    try {
+      const userId = req.user?.userId;
+      const recipes = await this.recipeService.getFavoriteRecipes(userId);
+      return this.responseHandler.success(recipes);
+    } catch (error) {
+      console.error('Error en getFavorites:', error);
+      throw error;
+    }
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const recipe = await this.recipeService.findOne(id);
@@ -86,6 +99,38 @@ export class RecipeController {
       this.responseHandler.notFound();
     }
     return this.responseHandler.deleted();
+  }
+
+  @Post(':id/favorite')
+  @UseGuards(JwtAuthGuard)
+  async addToFavorites(@Param('id') id: string, @Request() req: any) {
+    try {
+      const userId = req.user?.userId;
+      const recipe = await this.recipeService.addToFavorites(userId, id);
+      if (!recipe) {
+        return this.responseHandler.notFound('recipe');
+      }
+      return this.responseHandler.success(recipe);
+    } catch (error) {
+      console.error('Error en addToFavorites:', error);
+      throw error;
+    }
+  }
+
+  @Delete(':id/favorite')
+  @UseGuards(JwtAuthGuard)
+  async removeFromFavorites(@Param('id') id: string, @Request() req: any) {
+    try {
+      const userId = req.user?.userId;
+      const recipe = await this.recipeService.removeFromFavorites(userId, id);
+      if (!recipe) {
+        return this.responseHandler.notFound('recipe');
+      }
+      return this.responseHandler.success(recipe);
+    } catch (error) {
+      console.error('Error en removeFromFavorites:', error);
+      throw error;
+    }
   }
 }
 

@@ -67,6 +67,13 @@ export class RecipeService {
           });
         }
 
+        // Filtro onlyFavorites: solo recetas favoritas del usuario
+        if (criteria.onlyFavorites !== undefined && criteria.onlyFavorites === true && userId) {
+          queryBuilder
+            .innerJoin('recipe.favoritedBy', 'favoritedBy')
+            .andWhere('favoritedBy.id = :userId', { userId });
+        }
+
         queryBuilder.distinct(true);
         var recipes = await queryBuilder.getMany();
 
@@ -230,5 +237,98 @@ export class RecipeService {
 
     // extrae la solo la receta del mapeo
     return recipesWithAvailability.map(({ recipe }) => recipe);
+  }
+
+  async addToFavorites(userId: string, recipeId: string): Promise<Recipe | null> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['favoriteRecipes'],
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      const recipe = await this.recipeRepository.findOne({
+        where: { id: recipeId },
+      });
+
+      if (!recipe) {
+        throw new NotFoundException('Receta no encontrada');
+      }
+
+      // Verificar si ya está en favoritos
+      const isAlreadyFavorite = user.favoriteRecipes?.some(
+        (fav) => fav.id === recipeId,
+      );
+
+      if (!isAlreadyFavorite) {
+        user.favoriteRecipes = [...(user.favoriteRecipes || []), recipe];
+        await this.userRepository.save(user);
+      }
+
+      return this.findOne(recipeId);
+    } catch (error) {
+      console.error('Error en RecipeService.addToFavorites:', error);
+      throw error;
+    }
+  }
+
+  async removeFromFavorites(userId: string, recipeId: string): Promise<Recipe | null> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['favoriteRecipes'],
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      const recipe = await this.recipeRepository.findOne({
+        where: { id: recipeId },
+      });
+
+      if (!recipe) {
+        throw new NotFoundException('Receta no encontrada');
+      }
+
+      // Remover de favoritos si está presente
+      if (user.favoriteRecipes) {
+        user.favoriteRecipes = user.favoriteRecipes.filter(
+          (fav) => fav.id !== recipeId,
+        );
+        await this.userRepository.save(user);
+      }
+
+      return this.findOne(recipeId);
+    } catch (error) {
+      console.error('Error en RecipeService.removeFromFavorites:', error);
+      throw error;
+    }
+  }
+
+  async getFavoriteRecipes(userId: string): Promise<Recipe[]> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: [
+          'favoriteRecipes',
+          'favoriteRecipes.ingredients',
+          'favoriteRecipes.ingredients.ingredient',
+          'favoriteRecipes.tags',
+        ],
+      });
+
+      if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+      }
+
+      return user.favoriteRecipes || [];
+    } catch (error) {
+      console.error('Error en RecipeService.getFavoriteRecipes:', error);
+      throw error;
+    }
   }
 }
